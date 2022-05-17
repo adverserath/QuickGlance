@@ -16,25 +16,40 @@ namespace QuickGlance
 
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
+            helper.Events.GameLoop.OneSecondUpdateTicked += GameLoop_OneSecondUpdateTicked;
         }
 
-        private float zoomMemory = Game1.options.desiredBaseZoomLevel;
 
+        private float zoomMemory = Game1.options.desiredBaseZoomLevel;
+        private bool zoomedOut = false;
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (e.Button == SButton.LeftStick || e.Button == SButton.Home)
+            if (zoomedOut && (e.Button == SButton.LeftStick || e.Button == SButton.Home))
             {
+                zoomedOut = false;
                 Game1.options.desiredBaseZoomLevel = zoomMemory;
             }
         }
 
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if ((int)e.Button == Config.ZoomKey1 || (int)e.Button == Config.ZoomKey2)
+            if (!zoomedOut && ((int)e.Button == Config.ZoomKey1 || (int)e.Button == Config.ZoomKey2))
             {
-                zoomMemory = Game1.options.desiredBaseZoomLevel;
+                zoomedOut = true;
+                if (Game1.options.desiredBaseZoomLevel != Config.ZoomLevel)
+                    zoomMemory = Game1.options.desiredBaseZoomLevel;
                 Game1.options.desiredBaseZoomLevel = Config.ZoomLevel;
             }
         }
+
+        private void GameLoop_OneSecondUpdateTicked(object sender, OneSecondUpdateTickedEventArgs e)
+        {
+            if (zoomedOut && (!Helper.Input.IsDown((SButton)Config.ZoomKey1) && !Helper.Input.IsDown((SButton)Config.ZoomKey2)))
+            {
+                zoomedOut = false;
+                Game1.options.desiredBaseZoomLevel = zoomMemory;
+            }
+        }
+
     }
 }
