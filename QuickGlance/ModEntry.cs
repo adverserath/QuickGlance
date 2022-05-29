@@ -15,10 +15,16 @@ namespace QuickGlance
             this.Config = this.Helper.ReadConfig<ModConfig>();
 
             Harmony harmony = new Harmony(this.ModManifest.UniqueID);
-
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
-            helper.Events.GameLoop.OneSecondUpdateTicked += GameLoop_OneSecondUpdateTicked;
+            if (Config.ToggleZoom)
+            {
+                helper.Events.Input.ButtonPressed += this.OnButtonPressedToggle;
+            }
+            else
+            {
+                helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+                helper.Events.Input.ButtonReleased += this.OnButtonReleased;
+                helper.Events.GameLoop.OneSecondUpdateTicked += GameLoop_OneSecondUpdateTicked;
+            }
         }
 
         private Dictionary<long, float> zoomMemory = new Dictionary<long, float>();
@@ -27,7 +33,7 @@ namespace QuickGlance
         {
             if (zoomMemory.ContainsKey(Game1.player.UniqueMultiplayerID) && ((int)e.Button == Config.ZoomKey1 || (int)e.Button == Config.ZoomKey2))
             {
-                Game1.options.desiredBaseZoomLevel = zoomMemory.GetValueOrDefault(Game1.player.UniqueMultiplayerID,1f);
+                Game1.options.desiredBaseZoomLevel = zoomMemory.GetValueOrDefault(Game1.player.UniqueMultiplayerID, 1f);
                 zoomMemory.Remove(Game1.player.UniqueMultiplayerID);
             }
         }
@@ -39,6 +45,21 @@ namespace QuickGlance
                 if (Game1.options.desiredBaseZoomLevel != Config.ZoomLevel)
                     zoomMemory.Add(Game1.player.UniqueMultiplayerID, Game1.options.desiredBaseZoomLevel);
                 Game1.options.desiredBaseZoomLevel = Config.ZoomLevel;
+            }
+        }
+
+        private void OnButtonPressedToggle(object sender, ButtonPressedEventArgs e)
+        {
+            if (!zoomMemory.ContainsKey(Game1.player.UniqueMultiplayerID) && ((int)e.Button == Config.ZoomKey1 || (int)e.Button == Config.ZoomKey2))
+            {
+                if (Game1.options.desiredBaseZoomLevel != Config.ZoomLevel)
+                    zoomMemory.Add(Game1.player.UniqueMultiplayerID, Game1.options.desiredBaseZoomLevel);
+                Game1.options.desiredBaseZoomLevel = Config.ZoomLevel;
+            }
+            else if (zoomMemory.ContainsKey(Game1.player.UniqueMultiplayerID) && ((int)e.Button == Config.ZoomKey1 || (int)e.Button == Config.ZoomKey2))
+            {
+                Game1.options.desiredBaseZoomLevel = zoomMemory.GetValueOrDefault(Game1.player.UniqueMultiplayerID, 1f);
+                zoomMemory.Remove(Game1.player.UniqueMultiplayerID);
             }
         }
 
