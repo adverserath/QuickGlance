@@ -1,8 +1,6 @@
-﻿using HarmonyLib;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using System;
 using System.Collections.Generic;
 
 namespace QuickGlance
@@ -14,7 +12,6 @@ namespace QuickGlance
         {
             this.Config = this.Helper.ReadConfig<ModConfig>();
 
-            Harmony harmony = new Harmony(this.ModManifest.UniqueID);
             if (Config.ToggleZoom)
             {
                 helper.Events.Input.ButtonPressed += this.OnButtonPressedToggle;
