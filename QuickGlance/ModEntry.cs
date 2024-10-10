@@ -2,6 +2,8 @@
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using System;
+using System.Linq;
 
 namespace QuickGlance
 {
@@ -37,20 +39,20 @@ namespace QuickGlance
 
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (!Config.ToggleZoom && !Config.ZoomKeys.IsDown())
+            if (!Config.ToggleZoom && Config.ZoomKeys.GetState()==SButtonState.Released && Config.ZoomKeys.Keybinds.Any(x => x.Buttons.Contains(e.Button)))
             {
-                float zoom = zoomMemory.Value;
-                if (zoom is not 0f)
-                {
-                    Game1.options.desiredBaseZoomLevel = zoom;
-                    zoomMemory.Value = 0f;
+                    float zoom = zoomMemory.Value;
+                    if (zoom is not 0f)
+                    {
+                        Game1.options.desiredBaseZoomLevel = zoom;
+                        zoomMemory.Value = 0f;
+                    }
                 }
             }
-        }
 
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (Config.ZoomKeys.JustPressed())
+            if (Config.ZoomKeys.JustPressed() && Config.ZoomKeys.Keybinds.Any(x => x.Buttons.Contains(e.Button)))
             {
                 if (Config.ToggleZoom)
                 {
@@ -59,7 +61,8 @@ namespace QuickGlance
                     {
                         Game1.options.desiredBaseZoomLevel = zoom;
                         zoomMemory.Value = 0f;
-                    } else
+                    }
+                    else
                     {
                         zoomMemory.Value = Game1.options.desiredBaseZoomLevel;
                         Game1.options.desiredBaseZoomLevel = Config.ZoomLevel;

@@ -4,7 +4,7 @@
     <AssemblyName>QuickGlance</AssemblyName>
     <RootNamespace>QuickGlance</RootNamespace>
     <Version>1.5.50</Version>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
